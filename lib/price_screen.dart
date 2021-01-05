@@ -9,10 +9,30 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  
-  String selectedCurrency = 'USD';
+  CoinData coinData = CoinData();
 
+  String selectedCurrency = 'USD';
+  String convertedCurrency = '?';
+
+  @override
+  void initState() {
+    //calling getCoinData method in initState to get the USD value in initial start screen.
+    getCoinData();
+    super.initState();
+  }
+
+  //This method calls getConvertedCurrency method to request the data through the api in networking.dart class
+  void getCoinData() async {
+    num temp = await coinData.getConvertedCurrency(selectedCurrency);
+    setState(() {
+      convertedCurrency = temp.toStringAsFixed(0);
+    });
+  }
+
+  //Dropdown button in bottom screen to show in Android Platform.
+  // It will the show list of currencies in which we can get the values.
   DropdownButton getDropdownButton() {
+    //blank list to add the currencies.
     List<DropdownMenuItem<String>> dropDownItemList = [];
      for(String item in currenciesList) {
        var addItem = DropdownMenuItem(child: Text(item), value: item,);
@@ -25,11 +45,15 @@ class _PriceScreenState extends State<PriceScreen> {
       onChanged: (value) {
         setState(() {
           selectedCurrency = value;
+          convertedCurrency= '?';
+          getCoinData();
         });
       },
     );
   }
 
+  //CupertinoPicker to show the list of currencies in which we can convert the coins.
+  // If the platform is IOS, then we will call it.
   CupertinoPicker getPicker() {
     List<Text> pickerItemsList  = [];
     for(String item in currenciesList) {
@@ -40,11 +64,16 @@ class _PriceScreenState extends State<PriceScreen> {
       backgroundColor: Colors.lightBlue,
       itemExtent: 32.0,
       onSelectedItemChanged: (selectedIndex){
-        print(selectedIndex);
+        setState(() {
+          selectedCurrency = currenciesList[selectedIndex];
+          convertedCurrency = '?';
+          getCoinData();
+        });
       },
       children: pickerItemsList,
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +96,7 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = ? USD',
+                  '1 BTC = $convertedCurrency $selectedCurrency',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
@@ -88,6 +117,8 @@ class _PriceScreenState extends State<PriceScreen> {
       ),
     );
   }
+
+
 }
 
-//
+
