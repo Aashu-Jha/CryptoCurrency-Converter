@@ -36,9 +36,15 @@ const List<String> cryptoList = [
 class CoinData {
   //to get the response in networking.dart through http.getData();
   Future getConvertedCurrency(String requiredCurrency) async {
-    NetworkHelper networkHelper = NetworkHelper('$webUrl/BTC/$requiredCurrency?$apiKey');
+    Map<String,String> coinsList = {};
+    for(String crypto in cryptoList){
+      NetworkHelper networkHelper = NetworkHelper('$webUrl/$crypto/$requiredCurrency?$apiKey');
 
-    var result = await networkHelper.getData();
-    return result['rate'];
+      var result = await networkHelper.getData();
+      num value = result['rate'];
+      coinsList[crypto] = value.toStringAsFixed(0);
+    }
+
+    return coinsList;
   }
 }

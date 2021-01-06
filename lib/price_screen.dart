@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'coin_data.dart';
+import 'card_maker.dart';
 import 'dart:io' show Platform;
 
 class PriceScreen extends StatefulWidget {
@@ -12,7 +13,7 @@ class _PriceScreenState extends State<PriceScreen> {
   CoinData coinData = CoinData();
 
   String selectedCurrency = 'USD';
-  String convertedCurrency = '?';
+
 
   @override
   void initState() {
@@ -21,12 +22,23 @@ class _PriceScreenState extends State<PriceScreen> {
     super.initState();
   }
 
+  Map<String, String> coinValues = {};
+
+  bool isWaiting = false;
   //This method calls getConvertedCurrency method to request the data through the api in networking.dart class
   void getCoinData() async {
-    num temp = await coinData.getConvertedCurrency(selectedCurrency);
-    setState(() {
-      convertedCurrency = temp.toStringAsFixed(0);
-    });
+
+    isWaiting = true;
+    try {
+      var data = await coinData.getConvertedCurrency(selectedCurrency);
+      isWaiting = false;
+      setState(() {
+        coinValues = data;
+      });
+    } catch (e) {
+      print(e);
+    }
+
   }
 
   //Dropdown button in bottom screen to show in Android Platform.
@@ -45,7 +57,6 @@ class _PriceScreenState extends State<PriceScreen> {
       onChanged: (value) {
         setState(() {
           selectedCurrency = value;
-          convertedCurrency= '?';
           getCoinData();
         });
       },
@@ -66,7 +77,6 @@ class _PriceScreenState extends State<PriceScreen> {
       onSelectedItemChanged: (selectedIndex){
         setState(() {
           selectedCurrency = currenciesList[selectedIndex];
-          convertedCurrency = '?';
           getCoinData();
         });
       },
@@ -85,26 +95,13 @@ class _PriceScreenState extends State<PriceScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  '1 BTC = $convertedCurrency $selectedCurrency',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <CardMaker>[
+              CardMaker(text: '1 BTC ', convertedCurrency: isWaiting ? '?': coinValues['BTC'], selectedCurrency: selectedCurrency),
+              CardMaker(text: '1 ETH ', convertedCurrency: isWaiting ? '?': coinValues['ETH'], selectedCurrency: selectedCurrency),
+              CardMaker(text: '1 LTC ', convertedCurrency: isWaiting ? '?': coinValues['LTC'], selectedCurrency: selectedCurrency),
+            ],
           ),
           Container(
             height: 150.0,
@@ -120,5 +117,6 @@ class _PriceScreenState extends State<PriceScreen> {
 
 
 }
+
 
 
