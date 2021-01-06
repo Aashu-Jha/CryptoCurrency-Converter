@@ -22,15 +22,19 @@ class _PriceScreenState extends State<PriceScreen> {
     super.initState();
   }
 
+  //HashMap used to store values of all converted currencies.
   Map<String, String> coinValues = {};
 
+  //default value is false. It is used to show at the time of coin_value initialization in CardMaker.
   bool isWaiting = false;
   //This method calls getConvertedCurrency method to request the data through the api in networking.dart class
   void getCoinData() async {
 
+    //set to true at the time of await.
     isWaiting = true;
     try {
       var data = await coinData.getConvertedCurrency(selectedCurrency);
+      //set to false instantly after fetching the data.
       isWaiting = false;
       setState(() {
         coinValues = data;
